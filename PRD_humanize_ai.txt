@@ -1,0 +1,64 @@
+<context>
+# Overview  
+This product is a web application that allows users to paste blocks of AI-generated text and receive a humanized version. The goal is to transform AI-generated content so that it appears to be written by a human, making it less likely to be detected by online AI detectors. The app is valuable for users who need their content to pass as human-written for academic, professional, or creative purposes.
+
+# Core Features  
+- **Text Input & Output:** Users can paste AI-generated text and receive a humanized version.
+- **Humanization Engine:** Advanced algorithms and models to rewrite text in a more human-like style.
+- **AI Detector Feedback:** Optionally, show a score or feedback on how detectable the text is as AI-generated (using third-party APIs or open-source models).
+- **User Interface:** Simple, intuitive UI for pasting, editing, and copying text.
+- **Privacy & Security:** Ensure user data is not stored or misused.
+
+# User Experience  
+- **User personas:**
+  - Content creators needing undetectable text
+  - Students and academics
+  - Professionals preparing reports or emails
+- **Key user flows:**
+  - User visits the site, pastes AI-generated text, clicks "Humanize", and receives the output.
+  - User optionally checks the detectability score and iterates if needed.
+  - User copies the humanized text for use elsewhere.
+- **UI/UX considerations:**
+  - Minimalist, distraction-free interface
+  - Clear feedback and error handling
+  - Mobile and desktop responsive design
+
+</context>
+<PRD>
+# Technical Architecture  
+- **Frontend:** React (or similar) SPA for user interaction
+- **Backend:** Node.js/Python API to process and humanize text
+- **Humanization Engine:** Custom or fine-tuned LLM, or prompt engineering with existing LLM APIs (e.g., OpenAI, Claude)
+- **AI Detector Integration:** Use APIs or open-source models to provide feedback on detectability
+- **Infrastructure:** Cloud hosting (e.g., Vercel, AWS, GCP), secure API endpoints, rate limiting
+
+# Development Roadmap  
+- **MVP requirements:**
+  - Paste text, humanize, and copy output
+  - Basic UI/UX
+  - Simple backend with LLM integration
+  - Privacy policy and basic security
+- **Future enhancements:**
+  - AI detector feedback integration
+  - User accounts and history
+  - Adjustable humanization levels
+  - Support for multiple languages
+  - API access for programmatic use
+
+# Logical Dependency Chain
+- Build backend humanization API first (foundation)
+- Develop frontend to interact with API
+- Integrate LLM for text rewriting
+- Add AI detector feedback (optional, after MVP)
+- Enhance UI/UX and add advanced features
+
+# Risks and Mitigations  
+- **Technical challenges:** Ensuring high-quality, undetectable humanization; may require model fine-tuning or prompt engineering
+- **MVP definition:** Focus on core flow (paste, humanize, copy) before adding extras
+- **Resource constraints:** Use third-party APIs initially to reduce development time; plan for scaling as usage grows
+
+# Appendix  
+- Research on AI detectors and their weaknesses
+- List of LLMs and APIs considered
+- Example before/after text samples
+</PRD> 
