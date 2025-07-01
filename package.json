@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Web application that transforms AI-generated text into human-like content",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
+  "workspaces": ["frontend", "backend"],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "cd frontend && npm run dev",
@@ -28,6 +25,7 @@
     "type-check:backend": "cd backend && npm run type-check",
     "clean": "rimraf node_modules frontend/node_modules backend/node_modules frontend/dist backend/dist",
     "setup": "npm install && cd backend && npm install",
+    "lint-staged": "lint-staged",
     "postinstall": "husky install || echo 'Husky setup skipped'"
   },
   "devDependencies": {
