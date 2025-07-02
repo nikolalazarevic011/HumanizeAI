@@ -118,48 +118,18 @@ export class HumanizationController {
   getAvailableStyles = asyncHandler(async (req: Request, res: Response) => {
     const styles = [
       {
-        id: 'academic',
-        name: 'Academic',
-        description: 'Scholarly tone with formal language and proper structure',
-        example: 'Suitable for research papers, thesis, and academic writing',
-      },
-      {
         id: 'professional',
         name: 'Professional',
         description: 'Business-appropriate tone for workplace communication',
         example: 'Perfect for reports, emails, and business documents',
       },
-      {
-        id: 'casual',
-        name: 'Casual',
-        description: 'Conversational and approachable tone',
-        example: 'Great for blog posts, social media, and informal content',
-      },
-      {
-        id: 'creative',
-        name: 'Creative',
-        description: 'Engaging style with vivid language and storytelling elements',
-        example: 'Ideal for marketing copy, stories, and creative content',
-      },
     ];
 
     const intensities = [
       {
-        id: 'subtle',
-        name: 'Subtle',
-        description: 'Minimal changes, preserves original structure',
-        impact: 'Light touch-ups while keeping the original style',
-      },
-      {
-        id: 'moderate',
-        name: 'Moderate',
-        description: 'Balanced changes for natural flow',
-        impact: 'Good balance between original content and humanization',
-      },
-      {
         id: 'aggressive',
         name: 'Aggressive',
-        description: 'Significant restructuring and vocabulary changes',
+        description: 'Significant restructuring and vocabulary changes using WordsAPI synonyms',
         impact: 'Substantial transformation for maximum human-like feel',
       },
     ];
@@ -170,8 +140,8 @@ export class HumanizationController {
         styles,
         intensities,
         limits: {
-          minLength: 50,
-          maxLength: 5000,
+          minLength: 10,
+          maxLength: 3000,
           batchMaxItems: 10,
         },
       },
@@ -187,18 +157,15 @@ export class HumanizationController {
       totalHumanizations: 15420,
       averageProcessingTime: 2.8,
       popularStyles: {
-        casual: 0.45,
-        professional: 0.30,
-        academic: 0.15,
-        creative: 0.10,
+        professional: 1.0, // Only professional style supported
       },
       popularIntensities: {
-        moderate: 0.60,
-        subtle: 0.25,
-        aggressive: 0.15,
+        aggressive: 1.0, // Only aggressive intensity supported
       },
       averageTextLength: 850,
       successRate: 0.987,
+      wordsApiIntegration: true,
+      synonymReplacementRate: 0.7,
     };
 
     res.status(200).json({

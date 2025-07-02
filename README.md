@@ -1,14 +1,13 @@
 # HumanizeAI
 
-A web application that transforms AI-generated text into human-like content, making it less detectable by AI detection tools.
+A web application that transforms AI-generated text into human-like content using WordsAPI synonym replacement.
 
 ## 🚀 Features
 
-- **Text Humanization**: Transform AI-generated content into natural, human-like text
-- **AI Detection Feedback**: Get scores from multiple AI detection APIs
-- **Multiple Styles**: Choose from academic, casual, professional, and creative writing styles
+- **Text Humanization**: Transform AI-generated content into natural, human-like text using WordsAPI synonyms
+- **Professional Style**: Optimized for professional writing with aggressive synonym replacement
 - **Privacy-First**: No text storage - all processing happens in memory
-- **Real-time Processing**: Fast and efficient text transformation
+- **Real-time Processing**: Fast and efficient text transformation with WordsAPI integration
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## 🛠️ Tech Stack
@@ -17,16 +16,14 @@ A web application that transforms AI-generated text into human-like content, mak
 - **React 18+** with TypeScript
 - **Vite** for fast development and building
 - **TailwindCSS** for styling
-- **React Router** for navigation
-- **Zustand** for state management
+- **Axios** for API communication
 
 ### Backend
 - **Node.js** with Express.js
 - **TypeScript** for type safety
-- **OpenAI API** for text humanization
-- **Multiple AI Detection APIs** (GPTZero, Winston AI, Originality.AI)
-- **Redis** for caching
+- **WordsAPI** for synonym replacement
 - **Rate limiting** and security middleware
+- **Professional style with aggressive intensity only**
 
 ## 📁 Project Structure
 

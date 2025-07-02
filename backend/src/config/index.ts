@@ -23,6 +23,9 @@ const envSchema = z.object({
   CLAUDE_API_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
   
+  // WordsAPI for synonyms
+  WORDS_API_KEY: z.string().optional(),
+  
   // Security (simplified)
   JWT_SECRET: z.string().default('dev-secret-key-change-in-production'),
 });
@@ -72,6 +75,11 @@ export const config = {
       model: 'llama3-8b-8192', // Free tier model
       maxTokens: 1000,
       temperature: 0.7,
+    },
+    wordsapi: {
+      apiKey: env.WORDS_API_KEY || 'test-key',
+      baseUrl: 'https://wordsapiv1.p.rapidapi.com',
+      timeout: 10000,
     },
   },
   

@@ -14,9 +14,9 @@ export interface ApiError {
   details?: string[];
 }
 
-// Humanization Types
-export type Style = 'academic' | 'casual' | 'professional' | 'creative';
-export type Intensity = 'subtle' | 'moderate' | 'aggressive';
+// Humanization Types - simplified to only professional style and aggressive intensity
+export type Style = 'professional';
+export type Intensity = 'aggressive';
 
 export interface HumanizeRequest {
   text: string;
