@@ -5,6 +5,74 @@ import { ErrorCode, HumanizeRequest, HumanizeResponse } from '@/types';
 import wordsApiService from './wordsApiService';
 
 export class HumanizationService {
+  // Medical terminology whitelist - these words should never be humanized
+  private readonly medicalTermsWhitelist = new Set([
+    // Healthcare professionals
+    'doctor', 'doctors', 'physician', 'physicians', 'nurse', 'nurses', 'surgeon', 'surgeons',
+    'therapist', 'therapists', 'psychiatrist', 'psychiatrists', 'psychologist', 'psychologists',
+    'radiologist', 'radiologists', 'cardiologist', 'cardiologists', 'oncologist', 'oncologists',
+    'neurologist', 'neurologists', 'dermatologist', 'dermatologists', 'pediatrician', 'pediatricians',
+    'gynecologist', 'gynecologists', 'urologist', 'urologists', 'anesthesiologist', 'anesthesiologists',
+    'pharmacist', 'pharmacists', 'dentist', 'dentists', 'optometrist', 'optometrists',
+    'paramedic', 'paramedics', 'emt', 'emts', 'technician', 'technicians',
+    
+    // Basic medical terms
+    'patient', 'patients', 'medical', 'medicine', 'medication', 'medications', 'drug', 'drugs',
+    'treatment', 'treatments', 'therapy', 'therapies', 'diagnosis', 'diagnoses', 'symptom', 'symptoms',
+    'disease', 'diseases', 'condition', 'conditions', 'syndrome', 'syndromes', 'disorder', 'disorders',
+    'infection', 'infections', 'virus', 'viruses', 'bacteria', 'bacterial', 'antibiotic', 'antibiotics',
+    'vaccine', 'vaccines', 'vaccination', 'vaccinations', 'immunization', 'immunizations',
+    
+    // Body parts and systems
+    'heart', 'hearts', 'lung', 'lungs', 'brain', 'brains', 'liver', 'kidney', 'kidneys',
+    'stomach', 'intestine', 'intestines', 'blood', 'nerve', 'nerves', 'muscle', 'muscles',
+    'bone', 'bones', 'skin', 'eye', 'eyes', 'ear', 'ears', 'nose', 'mouth', 'throat',
+    
+    // Medical procedures
+    'surgery', 'surgeries', 'operation', 'operations', 'procedure', 'procedures',
+    'examination', 'examinations', 'test', 'tests', 'scan', 'scans', 'xray', 'x-ray',
+    'mri', 'ct', 'ultrasound', 'biopsy', 'biopsies',
+    
+    // Medical facilities
+    'hospital', 'hospitals', 'clinic', 'clinics', 'emergency', 'icu', 'ward', 'wards',
+    'pharmacy', 'pharmacies', 'laboratory', 'laboratories', 'lab', 'labs',
+    
+    // Medical measurements
+    'dose', 'doses', 'dosage', 'dosages', 'mg', 'ml', 'cc', 'units', 'blood pressure',
+    'temperature', 'pulse', 'heart rate', 'oxygen', 'glucose', 'cholesterol',
+    
+    // Pain and symptoms
+    'pain', 'ache', 'aches', 'fever', 'nausea', 'headache', 'headaches', 'migraine', 'migraines',
+    'fatigue', 'dizziness', 'swelling', 'inflammation', 'bleeding', 'bruising',
+    
+    // Common medical abbreviations (lowercase for case-insensitive matching)
+    'cpr', 'ekg', 'ecg', 'iv', 'er', 'or', 'rn', 'md', 'dds', 'phd', 'dvm'
+  ]);
+
+  // Check if a word should be protected from humanization
+  private isProtectedMedicalTerm(word: string): boolean {
+    // Normalize the word (lowercase, remove punctuation)
+    const normalizedWord = word.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    return this.medicalTermsWhitelist.has(normalizedWord);
+  }
+
+  // Apply pattern replacement while protecting medical terms
+  private safeReplace(text: string, pattern: RegExp, replacement: string | ((match: string) => string)): string {
+    return text.replace(pattern, (match, ...args) => {
+      // Extract just the word part for checking (remove surrounding punctuation/spaces)
+      const wordMatch = match.match(/\b[a-zA-Z0-9-]+\b/);
+      if (wordMatch && this.isProtectedMedicalTerm(wordMatch[0])) {
+        logger.debug('Protected medical term from replacement', { term: wordMatch[0], pattern: pattern.toString() });
+        return match; // Return original if it's a protected medical term
+      }
+      
+      // Apply replacement if it's not a protected term
+      if (typeof replacement === 'function') {
+        return replacement(match);
+      }
+      return replacement;
+    });
+  }
   // Main humanization method - balanced approach to eliminate AI patterns while preserving meaning
   async humanizeText(request: HumanizeRequest): Promise<HumanizeResponse> {
     const startTime = Date.now();
@@ -16,14 +84,23 @@ export class HumanizationService {
         intensity: 'aggressive',
       });
 
-      // Step 1: Remove obvious AI patterns and connectors
-      let humanizedText = this.destroyAIPatterns(request.text);
+      // Step 0: Separate content and references
+      const { content, references } = this.separateContentAndReferences(request.text);
+      
+      logger.info('Text separation completed', {
+        contentLength: content.length,
+        referencesLength: references.length,
+        hasReferences: references.length > 0
+      });
+
+      // Step 1: Remove obvious AI patterns and connectors (only on content)
+      let humanizedText = this.destroyAIPatterns(content);
 
       // Step 2: Light sentence structure adjustments
       humanizedText = this.destroyAISentencePatterns(humanizedText);
 
-      // Step 3: Moderate synonym replacement using WordsAPI
-      humanizedText = await wordsApiService.humanizeWithSynonyms(humanizedText);
+      // Step 3: Moderate synonym replacement using WordsAPI (with medical term protection)
+      humanizedText = await wordsApiService.humanizeWithSynonyms(humanizedText, this.medicalTermsWhitelist);
 
       // Step 4: Add minimal human touches
       humanizedText = this.addHumanImperfections(humanizedText);
@@ -31,20 +108,24 @@ export class HumanizationService {
       // Step 5: Final cleanup
       humanizedText = this.finalAIElimination(humanizedText);
 
-      // Calculate statistics
-      const statistics = this.calculateStatistics(request.text, humanizedText);
+      // Step 6: Recombine with preserved references
+      const finalText = this.recombineContentAndReferences(humanizedText, references);
+
+      // Calculate statistics (use final combined text)
+      const statistics = this.calculateStatistics(request.text, finalText);
       
       const processingTime = (Date.now() - startTime) / 1000;
 
       loggers.performance('Balanced humanization completed', Date.now() - startTime, {
         originalLength: request.text.length,
-        humanizedLength: humanizedText.length,
+        humanizedLength: finalText.length,
         changesCount: statistics.changesCount,
+        hadReferences: references.length > 0
       });
 
       return {
         originalText: request.text,
-        humanizedText,
+        humanizedText: finalText,
         style: 'professional',
         intensity: 'aggressive',
         processingTime,
@@ -68,6 +149,42 @@ export class HumanizationService {
         [error instanceof Error ? error.message : 'Unknown error']
       );
     }
+  }
+
+  // Separate content from references section
+  private separateContentAndReferences(text: string): { content: string; references: string } {
+    // Look for "References:" (case insensitive) and everything after it
+    const referencesMatch = text.match(/(.*?)\n?\s*(References?\s*:.*)/is);
+    
+    if (referencesMatch) {
+      const content = referencesMatch[1].trim();
+      const references = referencesMatch[2].trim();
+      
+      logger.info('References section detected and separated', {
+        contentLength: content.length,
+        referencesLength: references.length,
+        referencesPreview: references.substring(0, 100) + (references.length > 100 ? '...' : '')
+      });
+      
+      return { content, references };
+    }
+    
+    // No references found, return all as content
+    return { content: text.trim(), references: '' };
+  }
+
+  // Recombine humanized content with preserved references
+  private recombineContentAndReferences(humanizedContent: string, references: string): string {
+    if (!references) {
+      return humanizedContent;
+    }
+    
+    // Add appropriate spacing between content and references
+    const spacing = humanizedContent.endsWith('.') || humanizedContent.endsWith('!') || humanizedContent.endsWith('?') 
+      ? '\n\n' 
+      : '.\n\n';
+    
+    return humanizedContent + spacing + references;
   }
 
   // Eliminate common AI patterns but preserve readability
@@ -129,9 +246,9 @@ export class HumanizationService {
       [/\bcomprehensive(ly)?\b/gi, 'complete'],
     ];
 
-    // Apply transformations
+    // Apply transformations using safe replacement to protect medical terms
     basicAIPatterns.forEach(([pattern, replacement]) => {
-      processedText = processedText.replace(pattern as RegExp, replacement as string);
+      processedText = this.safeReplace(processedText, pattern as RegExp, replacement as string);
     });
 
     return processedText;
@@ -155,18 +272,18 @@ export class HumanizationService {
   private addHumanImperfections(text: string): string {
     let processedText = text;
 
-    // More casual replacements for AI detection avoidance
-    processedText = processedText.replace(/\bvery good\b/gi, 'really good');
-    processedText = processedText.replace(/\bvery important\b/gi, 'really important');
-    processedText = processedText.replace(/\bextremely\b/gi, 'really');
-    processedText = processedText.replace(/\bmust\b/gi, 'need to');
-    processedText = processedText.replace(/\bshall\b/gi, 'will');
-    processedText = processedText.replace(/\bwhom\b/gi, 'who');
+    // More casual replacements for AI detection avoidance (with medical term protection)
+    processedText = this.safeReplace(processedText, /\bvery good\b/gi, 'really good');
+    processedText = this.safeReplace(processedText, /\bvery important\b/gi, 'really important');
+    processedText = this.safeReplace(processedText, /\bextremely\b/gi, 'really');
+    processedText = this.safeReplace(processedText, /\bmust\b/gi, 'need to');
+    processedText = this.safeReplace(processedText, /\bshall\b/gi, 'will');
+    processedText = this.safeReplace(processedText, /\bwhom\b/gi, 'who');
     
-    // Replace perfect structures with more casual ones
-    processedText = processedText.replace(/\bA number of\b/gi, 'Several');
-    processedText = processedText.replace(/\bA variety of\b/gi, 'Different');
-    processedText = processedText.replace(/\bNumerous\b/gi, 'Many');
+    // Replace perfect structures with more casual ones (with medical term protection)
+    processedText = this.safeReplace(processedText, /\bA number of\b/gi, 'Several');
+    processedText = this.safeReplace(processedText, /\bA variety of\b/gi, 'Different');
+    processedText = this.safeReplace(processedText, /\bNumerous\b/gi, 'Many');
     
     return processedText;
   }

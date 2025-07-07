@@ -135,9 +135,18 @@ export class WordsApiService {
   }
 
   /**
+   * Check if a word is a protected medical term
+   */
+  private isProtectedMedicalTerm(word: string, medicalWhitelist?: Set<string>): boolean {
+    if (!medicalWhitelist) return false;
+    const normalizedWord = word.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    return medicalWhitelist.has(normalizedWord);
+  }
+
+  /**
    * Moderately humanize text to eliminate AI patterns while preserving meaning
    */
-  async humanizeWithSynonyms(text: string): Promise<string> {
+  async humanizeWithSynonyms(text: string, medicalWhitelist?: Set<string>): Promise<string> {
     const words = text.split(/(\s+|[^\w\s])/); // Split preserving whitespace and punctuation
     const processedWords: string[] = [];
 
@@ -170,7 +179,9 @@ export class WordsApiService {
         const lowerPart = part.toLowerCase();
         
         // More aggressive replacement for better AI detection avoidance
+        // Skip if it's a medical term, skip word, or doesn't meet other criteria
         if (!skipWords.has(lowerPart) && 
+            !this.isProtectedMedicalTerm(part, medicalWhitelist) &&
             part.length > 3 && 
             wordIndex % 2 === 0 && // Every second word
             Math.random() < 0.65) { // 65% chance to replace eligible words
