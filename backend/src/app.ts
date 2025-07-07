@@ -11,10 +11,14 @@ import { validateContentType, validateRequestSize, validateClientIP } from '@/mi
 
 // Import routes
 import healthRoutes from '@/routes/health';
+import authRoutes from '@/routes/auth';
 import humanizeRoutes from '@/routes/humanize';
 // import detectRoutes from '@/routes/detect';
 // import feedbackRoutes from '@/routes/feedback';
 // import statsRoutes from '@/routes/stats';
+
+// Import auth middleware
+import { authMiddleware } from '@/middleware/auth';
 
 // Setup global error handlers
 setupGlobalErrorHandlers();
@@ -91,10 +95,13 @@ app.use('/api', generalRateLimit);
 
 // API Routes
 app.use('/api/health', healthRoutes);
-app.use('/api/humanize', humanizeRoutes);
-// app.use('/api/detect', detectRoutes);
-// app.use('/api/feedback', feedbackRoutes);
-// app.use('/api/stats', statsRoutes);
+app.use('/api/auth', authRoutes);
+
+// Protected routes - require authentication
+app.use('/api/humanize', authMiddleware, humanizeRoutes);
+// app.use('/api/detect', authMiddleware, detectRoutes);
+// app.use('/api/feedback', authMiddleware, feedbackRoutes);
+// app.use('/api/stats', authMiddleware, statsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

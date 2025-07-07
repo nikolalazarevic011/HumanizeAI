@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { HumanizeRequest, HumanizeResponse, ApiResponse } from '@/types';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -12,10 +12,32 @@ const apiClient = axios.create({
   },
 });
 
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Add response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle auth errors
+    if (error.response?.status === 401) {
+      // Token expired or invalid, remove it
+      localStorage.removeItem('auth_token');
+      // Optionally trigger a page reload or redirect to login
+      window.location.reload();
+    }
+    
     console.error('API Error:', error);
     return Promise.reject(error);
   }

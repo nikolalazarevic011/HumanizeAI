@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Wand2, Settings, BarChart3 } from 'lucide-react';
+import { Wand2, Settings, BarChart3, LogOut, User } from 'lucide-react';
 import { humanizationApi } from '@/services/api';
 import { CopyButton } from '@/components/CopyButton';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useAuth } from '@/contexts/AuthContext';
 import { Style, Intensity, ProcessingStatus, HumanizeResponse } from '@/types';
 
 export const HumanizeApp: React.FC = () => {
+  const { user, logout } = useAuth();
   const [text, setText] = useState('');
   const [style, setStyle] = useState<Style>('professional');
   const [intensity, setIntensity] = useState<Intensity>('aggressive');
@@ -62,14 +64,34 @@ export const HumanizeApp: React.FC = () => {
     <div className='min-h-screen py-8 bg-gray-50'>
       <div className='max-w-6xl px-4 mx-auto sm:px-6 lg:px-8'>
         {/* Header */}
-        <div className='mb-8 text-center'>
-          <div className='flex items-center justify-center gap-3 mb-4'>
-            <Wand2 className='w-8 h-8 text-blue-600' />
-            <h1 className='text-4xl font-bold text-gray-900'>HumanizeAI</h1>
+        <div className='mb-8'>
+          {/* Top bar with user info and logout */}
+          <div className='flex items-center justify-between mb-6'>
+            <div className='flex items-center gap-2'>
+              <User className='w-5 h-5 text-gray-600' />
+              <span className='text-sm text-gray-600'>
+                Welcome, <span className='font-medium'>{user?.username}</span>
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              className='flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+            >
+              <LogOut className='w-4 h-4' />
+              Sign Out
+            </button>
           </div>
-          <p className='max-w-2xl mx-auto text-xl text-gray-600'>
-            Made with love, for Cristal ❤️
-          </p>
+
+          {/* Main title */}
+          <div className='text-center'>
+            <div className='flex items-center justify-center gap-3 mb-4'>
+              <Wand2 className='w-8 h-8 text-blue-600' />
+              <h1 className='text-4xl font-bold text-gray-900'>HumanizeAI</h1>
+            </div>
+            <p className='max-w-2xl mx-auto text-xl text-gray-600'>
+              Made with love, for Cristal ❤️
+            </p>
+          </div>
         </div>
 
         <div className='grid grid-cols-1 gap-8 lg:grid-cols-2'>

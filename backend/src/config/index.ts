@@ -26,8 +26,8 @@ const envSchema = z.object({
   // WordsAPI for synonyms
   WORDS_API_KEY: z.string().optional(),
   
-  // Security (simplified)
-  JWT_SECRET: z.string().default('dev-secret-key-change-in-production'),
+  // Security
+  JWT_SECRET: z.string().default('super-secure-jwt-secret-for-cristal-humanize-ai-2025-prod'),
 });
 
 // Validate environment variables

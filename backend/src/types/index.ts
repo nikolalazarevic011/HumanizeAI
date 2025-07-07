@@ -1,5 +1,35 @@
 // Backend types - simplified for personal use
 
+// User and Auth Types
+export interface User {
+  id: string;
+  username: string;
+  passwordHash: string;
+  createdAt: Date;
+  lastLogin?: Date;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  user: {
+    id: string;
+    username: string;
+    lastLogin?: Date;
+  };
+  token: string;
+}
+
+export interface AuthPayload {
+  userId: string;
+  username: string;
+  iat: number;
+  exp: number;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -48,6 +78,12 @@ export interface HealthResponse {
 
 // Error Codes
 export enum ErrorCode {
+  // Auth errors
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  TOKEN_INVALID = 'TOKEN_INVALID',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   TEXT_TOO_SHORT = 'TEXT_TOO_SHORT',
