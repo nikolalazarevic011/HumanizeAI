@@ -1,0 +1,17 @@
+{
+  "name": "humanizeai",
+  "type": "javascript",
+  "framework": "react",
+  "frontend": {
+    "framework": "react",
+    "config": {
+      "SourceDir": "src",
+      "DistributionDir": "dist",
+      "BuildCommand": "npm run build",
+      "StartCommand": "npm run dev"
+    }
+  },
+  "providers": [
+    "awscloudformation"
+  ]
+}
