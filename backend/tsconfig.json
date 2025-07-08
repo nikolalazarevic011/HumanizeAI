@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    // "rootDir": "./src", // Commented out to allow shared files
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",

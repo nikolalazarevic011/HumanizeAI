@@ -1,4 +1,4 @@
-import React from 'react';
+// No need to import React with new JSX transform
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { HumanizeApp } from '@/components/HumanizeApp';
