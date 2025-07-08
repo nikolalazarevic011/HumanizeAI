@@ -157,8 +157,8 @@ export class HumanizationService {
     const referencesMatch = text.match(/(.*?)\n?\s*(References?\s*:.*)/is);
     
     if (referencesMatch) {
-      const content = referencesMatch[1].trim();
-      const references = referencesMatch[2].trim();
+      const content = referencesMatch[1]?.trim() || '';
+      const references = referencesMatch[2]?.trim() || '';
       
       logger.info('References section detected and separated', {
         contentLength: content.length,

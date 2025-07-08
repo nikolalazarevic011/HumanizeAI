@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    // "rootDir": "./src", // Commented out to allow shared files
+    "rootDir": "./src", // Set root directory to src
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",
@@ -11,16 +11,14 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./src/*"],
-      "@shared/*": ["../shared/*"]
+      "@/*": ["./*"]
     },
     "types": ["node"]
   },
   "include": [
-    "src/**/*",
-    "../shared/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

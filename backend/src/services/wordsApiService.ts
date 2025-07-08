@@ -91,8 +91,8 @@ export class WordsApiService {
           'framework': ['structure'],
           'process': ['method']
         };
-        
-        const allowed = allowedTechSynonyms[lowerWord] || [];
+
+        const allowed = allowedTechSynonyms[lowerWord as keyof typeof allowedTechSynonyms] || [];
         return allowed.includes(lowerSynonym);
       }
       
@@ -131,7 +131,8 @@ export class WordsApiService {
 
     // Return a random synonym from filtered list
     const randomIndex = Math.floor(Math.random() * finalSynonyms.length);
-    return finalSynonyms[randomIndex];
+    const selectedSynonym = finalSynonyms[randomIndex];
+    return selectedSynonym || word;
   }
 
   /**
@@ -174,6 +175,11 @@ export class WordsApiService {
     for (let i = 0; i < words.length; i++) {
       const part = words[i];
       
+      if (!part) {
+        processedWords[i] = '';
+        continue;
+      }
+      
       // Only process actual words (not whitespace or punctuation)
       if (/^\w+$/.test(part)) {
         const lowerPart = part.toLowerCase();
@@ -190,7 +196,7 @@ export class WordsApiService {
             // Only use synonym if it's actually different and reasonable
             if (synonym !== part && synonym.length > 0) {
               // Preserve original capitalization
-              if (part[0] === part[0].toUpperCase()) {
+              if (part[0] === part[0]?.toUpperCase()) {
                 synonym = synonym.charAt(0).toUpperCase() + synonym.slice(1).toLowerCase();
               }
               processedWords[i] = synonym;

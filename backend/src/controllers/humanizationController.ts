@@ -48,11 +48,11 @@ export class HumanizationController {
   });
 
   // POST /api/humanize/batch (future feature)
-  humanizeBatch = asyncHandler(async (req: Request, res: Response) => {
+  humanizeBatch = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { texts, style, intensity, preserveFormatting } = req.body;
 
     if (!Array.isArray(texts) || texts.length === 0) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
@@ -61,10 +61,11 @@ export class HumanizationController {
         },
         timestamp: new Date().toISOString(),
       });
+      return;
     }
 
     if (texts.length > 10) { // Limit batch size
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
@@ -73,6 +74,7 @@ export class HumanizationController {
         },
         timestamp: new Date().toISOString(),
       });
+      return;
     }
 
     const results = await Promise.allSettled(
@@ -108,7 +110,7 @@ export class HumanizationController {
         failed,
         total: texts.length,
         successful: successful.length,
-        failed: failed.length,
+        failedCount: failed.length,
       },
       timestamp: new Date().toISOString(),
     });

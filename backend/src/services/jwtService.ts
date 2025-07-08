@@ -20,7 +20,7 @@ export class JwtService {
       expiresIn: this.expiresIn,
       issuer: 'humanize-ai',
       audience: 'humanize-ai-client',
-    });
+    } as jwt.SignOptions);
   }
 
   verifyToken(token: string): AuthPayload {

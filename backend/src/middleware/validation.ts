@@ -46,7 +46,7 @@ export const feedbackRequestSchema = z.object({
 
 // Validation middleware factory
 export function validateRequest<T>(schema: z.ZodSchema<T>) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const validatedData = schema.parse(req.body);
       req.body = validatedData;
@@ -62,7 +62,7 @@ export function validateRequest<T>(schema: z.ZodSchema<T>) {
           body: req.body,
         });
 
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: {
             code: ErrorCode.VALIDATION_ERROR,
@@ -71,6 +71,7 @@ export function validateRequest<T>(schema: z.ZodSchema<T>) {
           },
           timestamp: new Date().toISOString(),
         });
+        return;
       }
 
       // Handle unexpected validation errors
@@ -80,7 +81,7 @@ export function validateRequest<T>(schema: z.ZodSchema<T>) {
         body: req.body,
       });
 
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: ErrorCode.VALIDATION_ERROR,
@@ -89,6 +90,7 @@ export function validateRequest<T>(schema: z.ZodSchema<T>) {
         },
         timestamp: new Date().toISOString(),
       });
+      return;
     }
   };
 }
@@ -130,12 +132,12 @@ export function sanitizeTextFields(req: Request, res: Response, next: NextFuncti
 }
 
 // Content type validation
-export function validateContentType(req: Request, res: Response, next: NextFunction) {
+export function validateContentType(req: Request, res: Response, next: NextFunction): void {
   if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
     const contentType = req.headers['content-type'];
     
     if (!contentType || !contentType.includes('application/json')) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: ErrorCode.VALIDATION_ERROR,
@@ -144,6 +146,7 @@ export function validateContentType(req: Request, res: Response, next: NextFunct
         },
         timestamp: new Date().toISOString(),
       });
+      return;
     }
   }
   
@@ -152,11 +155,11 @@ export function validateContentType(req: Request, res: Response, next: NextFunct
 
 // Request size validation
 export function validateRequestSize(maxSizeBytes: number = 1024 * 1024) { // 1MB default
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const contentLength = parseInt(req.headers['content-length'] || '0', 10);
     
     if (contentLength > maxSizeBytes) {
-      return res.status(413).json({
+      res.status(413).json({
         success: false,
         error: {
           code: ErrorCode.VALIDATION_ERROR,
@@ -165,6 +168,7 @@ export function validateRequestSize(maxSizeBytes: number = 1024 * 1024) { // 1MB
         },
         timestamp: new Date().toISOString(),
       });
+      return;
     }
     
     next();
@@ -172,7 +176,7 @@ export function validateRequestSize(maxSizeBytes: number = 1024 * 1024) { // 1MB
 }
 
 // IP validation for security
-export function validateClientIP(req: Request, res: Response, next: NextFunction) {
+export function validateClientIP(req: Request, res: Response, next: NextFunction): void {
   const clientIP = req.ip || req.connection.remoteAddress;
   
   // Block obviously invalid or dangerous IPs
@@ -186,7 +190,7 @@ export function validateClientIP(req: Request, res: Response, next: NextFunction
     for (const pattern of blockedPatterns) {
       if (clientIP && pattern.test(clientIP)) {
         loggers.security('Blocked suspicious IP', { ip: clientIP });
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           error: {
             code: ErrorCode.VALIDATION_ERROR,
@@ -195,6 +199,7 @@ export function validateClientIP(req: Request, res: Response, next: NextFunction
           },
           timestamp: new Date().toISOString(),
         });
+        return;
       }
     }
   }
